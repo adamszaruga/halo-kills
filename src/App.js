@@ -10,7 +10,9 @@ class App extends Component {
     matchId: '01de542a-d03e-40d5-8f38-9d8e4cab9df3',
     Deaths: [],
     image: new window.Image(),
-    search: ""
+    search: "",
+    selectedOption: "all",
+    gamertag: ""
   }
   componentDidMount() {
     this.state.image.src = 'https://content.halocdn.com/media/Default/community/Halo5MapOverheads/truth-ce12aa021ef843a39d498cb84ebe1d99.png';
@@ -40,6 +42,7 @@ class App extends Component {
   }
   getGame(gamertag) {
     console.log('getting game for : ', gamertag);
+    this.setState({gamertag})
     axios.get(`https://www.haloapi.com/stats/h5/players/${encodeURIComponent(gamertag)}/matches`,
         {
           headers: {
@@ -62,11 +65,25 @@ class App extends Component {
   }
 
   render() {
+    var deaths = this.state.Deaths;
+    if (this.state.selectedOption === "mykills") {
+      deaths = deaths.filter((death)=>{
+        return death.Killer.Gamertag.toLowerCase() === this.state.gamertag.toLowerCase()
+      })
+    } else if (this.state.selectedOption === "mydeaths") {
+      deaths = deaths.filter((death)=>{
+        return death.Victim.Gamertag.toLowerCase() === this.state.gamertag.toLowerCase()
+      })
+    }
     return (
         <div>
           <h6>Enter your GT to find your latest game on Truth</h6>
           <input value={this.state.search} onKeyDown={(e)=>{e.keyCode == 13 ? this.getGame(this.state.search) : null}} onChange={(e)=>{this.setState({search: e.target.value})}} />
-          
+          <form>
+            <input  type="radio" value="all" onChange={(e)=>{this.setState({selectedOption: e.target.value})}} checked={this.state.selectedOption === 'all'} /><span>all kills</span>
+            <input  type="radio" value="mykills" onChange={(e)=>{this.setState({selectedOption: e.target.value})}} checked={this.state.selectedOption === 'mykills'} /><span>my kills</span>
+            <input  type="radio" value="mydeaths" onChange={(e)=>{this.setState({selectedOption: e.target.value})}} checked={this.state.selectedOption === 'mydeaths'} /><span>my deaths</span>
+          </form>
           <Stage width={window.innerWidth} height={window.innerHeight}>
             <Layer>
               <Image
@@ -79,7 +96,7 @@ class App extends Component {
               />
             </Layer>
             <Layer>
-              {this.state.Deaths.map((death, i)=>{
+              {deaths.map((death, i)=>{
                 let { KillerWorldLocation, VictimWorldLocation } = death;
     
                 let scale = 16.4771319;
