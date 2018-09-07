@@ -13,7 +13,6 @@ class App extends Component {
     search: ""
   }
   componentDidMount() {
-    this.loadKills()
     this.state.image.src = 'https://content.halocdn.com/media/Default/community/Halo5MapOverheads/truth-ce12aa021ef843a39d498cb84ebe1d99.png';
     this.state.image.onload = () => {
       // calling set state here will do nothing
